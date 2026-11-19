@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LEASEGATE リース門 | 新リース会計基準(第34号) PVオンバランス試算・組込リース監査</title>
+  <meta name="description" content="ブラウザ完結・通信ゼロで新リース会計基準（企業会計基準第34号・2027年強制適用）の割引現在価値(PV)・使用権資産・初年度利息＆減価償却試算・短期/少額300万円免除・組込リース識別を監査します。" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <header class="masthead" data-ui="masthead">
+      <div class="brand-lockup">
+        <span class="hanko-seal" aria-hidden="true">会計</span>
+        <div>
+          <h1>LEASEGATE <span class="title-sub">リース門</span></h1>
+          <p class="subtitle">新リース会計基準（企業会計基準第34号・2027年強制適用）PV試算 ＆ 組込リース識別ローカル監査</p>
+        </div>
+      </div>
+      <div class="trust-badges">
+        <span class="trust-pill" data-ui="badge">100% ブラウザローカル計算</span>
+        <span class="trust-pill" data-ui="badge">契約賃料・賃貸台帳社外送信ゼロ</span>
+      </div>
+    </header>
+
+    <main class="workspace-grid">
+      <section class="panel input-panel" data-ui="panel">
+        <div class="panel-head">
+          <h2>1. 賃料・期間・割引率(IBR)・新品価額・契約条件</h2>
+          <div class="preset-actions">
+            <button type="button" id="btn-sample-bad" class="btn-secondary" data-ui="btn">本社フロア 計上漏れ・非識別例</button>
+            <button type="button" id="btn-sample-good" class="btn-secondary" data-ui="btn">新リース基準 完全準拠例</button>
+          </div>
+        </div>
+
+        <div class="meta-grid">
+          <label>
+            会社名 / 経理部門名
+            <input id="in-org" type="text" value="丸の内商事株式会社" />
+          </label>
+          <label>
+            対象契約名（物件・倉庫・IT機器等）
+            <input id="in-contract-name" type="text" value="東京本社オフィス8階 定期建物賃貸借" />
+          </label>
+        </div>
+
+        <div class="meta-grid-3">
+          <label>
+            月額リース料 (JPY)
+            <input id="in-monthly" type="number" min="0" step="50000" value="1200000" />
+          </label>
+          <label>
+            解約不能＋延長リース期間 (か月)
+            <input id="in-months" type="number" min="0" step="6" value="36" />
+          </label>
+          <label>
+            年率割引率 / IBR (%)
+            <input id="in-rate" type="number" min="0" step="0.1" value="1.8" />
+          </label>
+        </div>
+
+        <div class="meta-grid-3">
+          <label>
+            新品時資産価額目安 (JPY・300万以下免除判定)
+            <input id="in-newval" type="number" min="0" step="1000000" value="180000000" />
+          </label>
+          <label class="inline-check" style="margin-top:24px;">
+            <input id="in-purchase" type="checkbox" />
+            <span>購入オプション付帯あり</span>
+          </label>
+          <label class="inline-check" style="margin-top:24px;">
+            <input id="in-control" type="checkbox" checked />
+            <span>特定資産の使用指図・支配権あり</span>
+          </label>
+        </div>
+
+        <div class="meta-grid">
+          <label class="inline-check">
+            <input id="in-onbs" type="checkbox" />
+            <span>すでにB/S使用権資産・リース負債へオンバランス計上済</span>
+          </label>
+        </div>
+
+        <label class="field-block">
+          契約書条項・会計方針メモ・識別評価テキスト
+          <textarea id="in-contract" rows="9" placeholder="特定資産の識別判定、解約不能期間/延長オプション、追加借入利子率(IBR)、短期12か月以内・少額300万円以下免除、組込リース識別、リース/非リース構成部分(共益費・保守料)分離、第34号注記開示を入力..."></textarea>
+        </label>
+
+        <div class="run-bar">
+          <button type="button" id="btn-audit" class="btn-primary" data-ui="btn">現在価値PV計算 ＆ 新リース基準監査を実行</button>
+        </div>
+      </section>
+
+      <section class="panel output-panel" data-ui="panel">
+        <div class="panel-head">
+          <h2>2. B/Sオンバランス PV・初年度P/L・監査リスク</h2>
+          <div id="status-badge" class="score-pill" data-ui="score-pill">未診断</div>
+        </div>
+
+        <div class="summary-strip" data-ui="summary-strip">
+          <div class="metric-cell" data-ui="metric">
+            <span class="metric-label">基準適合スコア</span>
+            <strong id="m-score" class="metric-val">—</strong>
+          </div>
+          <div class="metric-cell" data-ui="metric">
+            <span class="metric-label">リース負債 PV / B/S影響</span>
+            <strong id="m-pv" class="metric-val">—</strong>
+          </div>
+          <div class="metric-cell" data-ui="metric">
+            <span class="metric-label">初年度 償却 ＋ 利息</span>
+            <strong id="m-pl" class="metric-val">—</strong>
+          </div>
+        </div>
+
+        <h3>検出された新リース会計基準（第34号）上の課題</h3>
+        <div id="findings-list" class="findings-list"></div>
+
+        <div class="draft-head">
+          <h3>自動生成『新リース会計基準 影響試算・監査書』Markdown</h3>
+          <div class="draft-actions">
+            <button type="button" id="btn-copy-md" class="btn-secondary" data-ui="btn">Markdownをコピー</button>
+            <button type="button" id="btn-download-md" class="btn-secondary" data-ui="btn">.md 保存</button>
+          </div>
+        </div>
+        <pre id="md-output" class="code-box"><code></code></pre>
+      </section>
+    </main>
+
+    <footer class="site-footer" data-ui="footer">
+      <p>LEASEGATE リース門 — Horizon-Money Studio Track 2（完全クライアントサイド実行・通信ゼロ・新リース会計基準第34号試算ツール）</p>
+    </footer>
+  </div>
+
+  <script type="module" src="./app.mjs"></script>
+</body>
+</html>
